@@ -24,12 +24,8 @@ resource "aws_elb" "wp" {
   tags {
     Name = "TejasELB"
   }
-}
-  vars {
-    lbdns = "${aws_elb.wp.dns_name}"
-  }
-}
 
+}
 resource "aws_cloudwatch_metric_alarm" "up" {
   alarm_name          = "up"
   comparison_operator = "GreaterThanOrEqualToThreshold"
