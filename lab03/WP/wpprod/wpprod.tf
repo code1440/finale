@@ -1,5 +1,5 @@
 provider "aws" {
-  region     = "us-east-1"
+  region     = "us-east-2"
 }
 resource "aws_internet_gateway" "gwmuhas" {
   vpc_id = "${aws_vpc.vpcmuhas.id}"
@@ -154,7 +154,7 @@ resource "aws_default_network_acl" "default" {
 resource "aws_elb" "wp" {
   name               = "elb"
   subnets	      = ["${aws_subnet.subnetmuhas.id}","${aws_subnet.subnetmuhass.id}"]
-  #availability_zones  = ["us-east-1a", "us-east-1b"]
+  #availability_zones  = ["us-east-2a", "us-east-2b"]
 
   listener {
     instance_port     = 80
