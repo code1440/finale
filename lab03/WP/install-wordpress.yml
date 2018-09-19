@@ -1,0 +1,12 @@
+- name: Install stuff into ec2 hosts
+  hosts: all
+  vars:
+    ansible_ssh_user: ubuntu
+    ansible_ssh_private_key_file: ~/Downloads/fullstack.pem
+    become: yes
+
+  roles:
+    - server
+    - php
+    - mysql
+    - wordpress
