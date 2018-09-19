@@ -16,7 +16,7 @@ resource "aws_instance" "NATProd" {
 }
 
 resource "aws_route" "r" {
-  route_table_id = "rtb-02ec857935c9afb7c"
+  route_table_id = "rtb-035dde7ba7da45780"
   destination_cidr_block    = "0.0.0.0/0"
   instance_id = "${aws_instance.NATProd.id}"
 }
