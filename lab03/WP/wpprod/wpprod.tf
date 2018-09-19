@@ -242,7 +242,7 @@ resource "aws_autoscaling_policy" "down" {
 
 
 resource "aws_launch_configuration" "wp" {
-  image_id      = "ami-38708b45"
+  image_id      = "ami-0552e3455b9bc8d50"
   instance_type = "t2.micro"
   key_name 	= "terraformwp"
   security_groups = ["${aws_default_security_group.secgrmuhas.id}"]
@@ -264,7 +264,7 @@ resource "aws_autoscaling_group" "wp" {
 
 resource "aws_instance" "bastion" {
   count = 1
-  ami           = "ami-467ca739"
+  ami           = "ami-03291866"
   instance_type = "t2.micro"
   subnet_id     = "${aws_subnet.subnetmuhas.id}"
   key_name      = "terraformwp"
