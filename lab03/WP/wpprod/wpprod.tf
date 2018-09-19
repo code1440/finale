@@ -105,7 +105,7 @@ resource "aws_autoscaling_group" "wp" {
   min_size                  = 1
   launch_configuration = "${aws_launch_configuration.wp.name}"
   health_check_type         = "ELB"
-  vpc_zone_identifier       = ["vpc-04186de44db3095fa"]
+  vpc_zone_identifier       = ["subnet-00d193a4d3d04e6d9"]
   load_balancers = ["${aws_elb.wp.name}"]
   
 
@@ -121,7 +121,7 @@ resource "aws_instance" "bastion" {
 
   provisioner "file" {
     source      = "~/Downloads/fullstack.pem"
-    destination = "~/Downloads/fullstack.pem"
+    destination = "~/.ssh/fullstack.pem"
     connection {
       type     = "ssh"
       user     = "ec2-user"
@@ -133,10 +133,10 @@ resource "aws_instance" "bastion" {
     connection {
       type     = "ssh"
       user     = "ec2-user"
-      private_key = "${file("~/Downloads/fullstack.pem")}"
+      private_key = "${file("~/.ssh/fullstack.pem")}"
     }
     inline = [
-      "chmod 400 ~/Downloads/fullstack.pem",
+      "chmod 400 ~/.ssh/fullstack.pem",
     ]
   }
 
