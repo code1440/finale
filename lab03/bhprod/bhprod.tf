@@ -26,7 +26,7 @@ resource "aws_instance" "BHprod" {
   ami           = "ami-6871a115"
   instance_type = "t2.micro"
   vpc_security_group_ids = [
-        "${aws_security_group.bh_prod_rule.id}"    ]
+        "${aws_security_group.bh_rule.id}"    ]
   subnet_id = "subnet-00d193a4d3d04e6d9"
   key_name = "fullstack"
   tags {
