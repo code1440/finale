@@ -1,48 +1,66 @@
-# Create Security Group & Bastion Host to access private subnet
-provider "aws" {
-region = "us-east-1"
- }
- resource "aws_security_group" "wp_rule" {
-  name        = "wp_prod_rule"
-  description = "Allow all inbound traffic"
-  vpc_id      = "vpc-04186de44db3095fa"
+resource "aws_placement_group" "prod" {
+  name     = "prod"
+  strategy = "cluster"
+}
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["198.207.185.100/32"]
+resource "aws_autoscaling_group" "wpprod" {
+  name                      = "wp-terraform-prod"
+  max_size                  = 5
+  min_size                  = 2
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  desired_capacity          = 4
+  force_delete              = true
+  placement_group           = "${aws_placement_group.prod.id}"
+  launch_configuration      = "${aws_launch_configuration.wp_prod.name}"
+  vpc_zone_identifier       = ["subnet-00d193a4d3d04e6d9", "subnet-0c6b0649641900769"]
+
+  initial_lifecycle_hook {
+    name                 = "wp_prod"
+    default_result       = "CONTINUE"
+    heartbeat_timeout    = 2000
+    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
+
+    notification_metadata = <<EOF
+{
+  "foo": "bar"
+}
+EOF
+
+    notification_target_arn = "arn:aws:sqs:us-east-1:444455556666:queue1*"
+    role_arn                = "arn:aws:iam::123456789012:role/S3Access"
   }
 
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-    
+  tag {
+    key                 = "foo"
+    value               = "bar"
+    propagate_at_launch = true
+  }
+
+  timeouts {
+    delete = "15m"
+  }
+
+  tag {
+    key                 = "lorem"
+    value               = "ipsum"
+    propagate_at_launch = false
   }
 }
-resource "aws_instance" "wpprod" {
-  ami           = "ami-6871a115"
+
+resource "aws_launch_template" "foobar" {
+  name_prefix = "foobar"
+  image_id = "ami-0a950ca991c6c754b"
   instance_type = "t2.micro"
-  vpc_security_group_ids = [
-        "${aws_security_group.wp_rule.id}"    ]
-  subnet_id = "subnet-00d193a4d3d04e6d9"
-  key_name = "fullstack"
-  count = 2
-  tags {
-    Name = "wpprod"
+}
+
+resource "aws_autoscaling_group" "bar" {
+  availability_zones = ["us-east-1"]
+  desired_capacity = 1
+  max_size = 3
+  min_size = 1
+  launch_template = {
+    id = "${aws_launch_template.foobar.id}"
+    version = "$$Latest"
   }
-}  
+}
