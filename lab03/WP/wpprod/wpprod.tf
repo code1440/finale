@@ -19,7 +19,7 @@ resource "aws_vpc" "vpcmuhas" {
 }
 
 resource "aws_subnet" "subnetmuhas" {
-  availability_zone = "us-east-1a"
+  availability_zone = "us-east-2a"
   vpc_id     = "${aws_vpc.vpcmuhas.id}"
   cidr_block = "192.168.0.0/26"
   map_public_ip_on_launch = "true"
@@ -30,7 +30,7 @@ resource "aws_subnet" "subnetmuhas" {
 }
 
 resource "aws_subnet" "subnetmuhass" {
-  availability_zone = "us-east-1b"
+  availability_zone = "us-east-2b"
   vpc_id     = "${aws_vpc.vpcmuhas.id}"
   cidr_block = "192.168.0.64/26"
 
