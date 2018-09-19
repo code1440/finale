@@ -1,160 +1,10 @@
 provider "aws" {
-  region     = "us-east-2"
+  region     = "us-east-1"
 }
-resource "aws_internet_gateway" "gwmuhas" {
-  vpc_id = "${aws_vpc.vpcmuhas.id}"
-
-  tags {
-    Name = "muhas"
-  }
-}
-resource "aws_vpc" "vpcmuhas" {
-  cidr_block       = "192.168.0.0/24"
-  instance_tenancy = "default"
-  enable_dns_hostnames = "true"
-
-  tags {
-    Name = "muhas"
-  }
-}
-
-resource "aws_subnet" "subnetmuhas" {
-  availability_zone = "us-east-2a"
-  vpc_id     = "${aws_vpc.vpcmuhas.id}"
-  cidr_block = "192.168.0.0/26"
-  map_public_ip_on_launch = "true"
-
-  tags {
-    Name = "public_muhas"
-  }
-}
-
-resource "aws_subnet" "subnetmuhass" {
-  availability_zone = "us-east-2b"
-  vpc_id     = "${aws_vpc.vpcmuhas.id}"
-  cidr_block = "192.168.0.64/26"
-
-  tags {
-    Name = "private_muhas"
-  }
-}
-
-
-resource "aws_vpc_dhcp_options_association" "dns_resolver" {
-  vpc_id          = "${aws_vpc.vpcmuhas.id}"
-  dhcp_options_id = "${aws_vpc_dhcp_options.muhas.id}"
-}
-
-resource "aws_vpc_dhcp_options" "muhas" {
-  domain_name          = "ec2.muhas"
-  domain_name_servers  = ["AmazonProvidedDNS"]
-
-  tags {
-    Name = "muhas"
-  }
-}
-
-resource "aws_default_route_table" "OutRouteMuhas" {
-  default_route_table_id = "${aws_vpc.vpcmuhas.default_route_table_id}"
-
- route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.gwmuhas.id}"
-  }
-
-
-  tags {
-    Name = "public_muhas"
-  }
-}
-
-resource "aws_route_table" "r" {
-  vpc_id = "${aws_vpc.vpcmuhas.id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_nat_gateway.gw.id}"
-  }
-
-  tags {
-    Name = "muhas_private"
-  }
-}
-
-resource "aws_route_table_association" "a" {
-  subnet_id      = "${aws_subnet.subnetmuhass.id}"
-  route_table_id = "${aws_route_table.r.id}"
-}
-
-resource "aws_eip" "ip" {
-  vpc      = true
-  tags {
-    Name = "muhas"
-  }
-
-}
-
-resource "aws_nat_gateway" "gw" {
-  allocation_id = "${aws_eip.ip.id}"
-  subnet_id     = "${aws_subnet.subnetmuhas.id}"
-  tags {
-    Name = "muhas"
-  }
-}
-
-resource "aws_default_security_group" "secgrmuhas" {
-  vpc_id      = "${aws_vpc.vpcmuhas.id}"
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-  }
-  tags {
-    Name = "muhas"
-  }
-
-}
-
-resource "aws_default_network_acl" "default" {
-  default_network_acl_id = "${aws_vpc.vpcmuhas.default_network_acl_id}"
-  subnet_ids = ["${aws_subnet.subnetmuhas.id}"]
-
-  ingress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  egress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-  tags {
-    Name = "muhas"
-  }
-}
-
-
 resource "aws_elb" "wp" {
   name               = "elb"
-  subnets	      = ["${aws_subnet.subnetmuhas.id}","${aws_subnet.subnetmuhass.id}"]
-  #availability_zones  = ["us-east-2a", "us-east-2b"]
+  subnets	      = ["subnet-00d193a4d3d04e6d9","subnet-0c6b0649641900769"]
+  #availability_zones  = ["us-east-1f", "us-east-1e"]
 
   listener {
     instance_port     = 80
@@ -172,7 +22,7 @@ resource "aws_elb" "wp" {
   }
 
   tags {
-    Name = "muhas"
+    Name = "TejasELB"
   }
 }
 
@@ -242,10 +92,10 @@ resource "aws_autoscaling_policy" "down" {
 
 
 resource "aws_launch_configuration" "wp" {
-  image_id      = "ami-0552e3455b9bc8d50"
+  image_id      = "ami-04169656fea786776"
   instance_type = "t2.micro"
   key_name 	= "fullstack"
-  security_groups = ["${aws_default_security_group.secgrmuhas.id}"]
+  security_groups = ["sg-04adc18ebe624bf24"]
   associate_public_ip_address = "false"
   user_data = "${data.template_file.wp.rendered}"
 }
@@ -255,7 +105,7 @@ resource "aws_autoscaling_group" "wp" {
   min_size                  = 1
   launch_configuration = "${aws_launch_configuration.wp.name}"
   health_check_type         = "ELB"
-  vpc_zone_identifier       = ["${aws_subnet.subnetmuhass.id}"]
+  vpc_zone_identifier       = ["${aws_subnet.PublicSubnetProd.id}"]
   load_balancers = ["${aws_elb.wp.name}"]
   
 
@@ -264,9 +114,9 @@ resource "aws_autoscaling_group" "wp" {
 
 resource "aws_instance" "bastion" {
   count = 1
-  ami           = "ami-03291866"
+  ami           = "ami-6871a115"
   instance_type = "t2.micro"
-  subnet_id     = "${aws_subnet.subnetmuhas.id}"
+  subnet_id     = "subnet-00d193a4d3d04e6d9"
   key_name      = "fullstack"
 
   provisioner "file" {
@@ -291,7 +141,7 @@ resource "aws_instance" "bastion" {
   }
 
   tags {
-    Name = "bastion_host_muha"
+    Name = "bastion_host_tejas"
   }
 } 
 
@@ -314,15 +164,15 @@ resource "aws_db_instance" "wordpressdb" {
   skip_final_snapshot     = "true"
 
   tags {
-    Name = "muhas"
+    Name = "tejasdb"
   }
 
 }
 resource "aws_db_subnet_group" "wp" {
   name       = "wp"
-  subnet_ids = ["${aws_subnet.subnetmuhas.id}","${aws_subnet.subnetmuhass.id}"]
+  subnet_ids = ["subnet-00d193a4d3d04e6d9","subnet-0c6b0649641900769"]
 
   tags {
-    Name = "muhas"
+    Name = "tejas"
   }
 }
