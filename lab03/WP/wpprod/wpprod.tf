@@ -244,7 +244,7 @@ resource "aws_autoscaling_policy" "down" {
 resource "aws_launch_configuration" "wp" {
   image_id      = "ami-0552e3455b9bc8d50"
   instance_type = "t2.micro"
-  key_name 	= "terraformwp"
+  key_name 	= "fullstack"
   security_groups = ["${aws_default_security_group.secgrmuhas.id}"]
   associate_public_ip_address = "false"
   user_data = "${data.template_file.wp.rendered}"
@@ -267,7 +267,7 @@ resource "aws_instance" "bastion" {
   ami           = "ami-03291866"
   instance_type = "t2.micro"
   subnet_id     = "${aws_subnet.subnetmuhas.id}"
-  key_name      = "terraformwp"
+  key_name      = "fullstack"
 
   provisioner "file" {
     source      = "~/Downloads/fullstack.pem"
