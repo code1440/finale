@@ -270,12 +270,12 @@ resource "aws_instance" "bastion" {
   key_name      = "terraformwp"
 
   provisioner "file" {
-    source      = "~/.ssh/terraformwp.pem"
-    destination = "~/.ssh/terraformwp.pem"
+    source      = "~/Downloads/fullstack.pem"
+    destination = "~/Downloads/fullstack.pem"
     connection {
       type     = "ssh"
       user     = "ec2-user"
-      private_key = "${file("~/.ssh/terraformwp.pem")}"
+      private_key = "${file("~/Downloads/fullstack.pem")}"
     }
   }
 
@@ -283,10 +283,10 @@ resource "aws_instance" "bastion" {
     connection {
       type     = "ssh"
       user     = "ec2-user"
-      private_key = "${file("~/.ssh/terraformwp.pem")}"
+      private_key = "${file("~/Downloads/fullstack.pem")}"
     }
     inline = [
-      "chmod 400 ~/.ssh/terraformwp.pem",
+      "chmod 400 ~/Downloads/fullstack.pem",
     ]
   }
 
