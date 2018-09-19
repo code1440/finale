@@ -105,7 +105,7 @@ resource "aws_autoscaling_group" "wp" {
   min_size                  = 1
   launch_configuration = "${aws_launch_configuration.wp.name}"
   health_check_type         = "ELB"
-  vpc_zone_identifier       = ["${aws_subnet.PublicSubnetProd.id}"]
+  vpc_zone_identifier       = ["vpc-04186de44db3095fa"]
   load_balancers = ["${aws_elb.wp.name}"]
   
 
