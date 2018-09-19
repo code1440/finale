@@ -121,7 +121,7 @@ resource "aws_instance" "bastion" {
 
   provisioner "file" {
     source      = "~/Downloads/fullstack.pem"
-    destination = "~/Downloads/fullstack.pem"
+    destination = "~/fullstack.pem"
     connection {
       type     = "ssh"
       user     = "ec2-user"
@@ -133,10 +133,10 @@ resource "aws_instance" "bastion" {
     connection {
       type     = "ssh"
       user     = "ec2-user"
-      private_key = "${file("~/Downloads/fullstack.pem")}"
+      private_key = "${file("~/fullstack.pem")}"
     }
     inline = [
-      "chmod 400 ~/Downloads/fullstack.pem",
+      "chmod 400 ~/fullstack.pem",
     ]
   }
 
